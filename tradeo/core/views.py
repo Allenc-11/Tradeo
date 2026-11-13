@@ -5,8 +5,13 @@ from item.models import Category, Item
 from .forms import SignupForm
 
 def index(request):
-    items = Item.objects.filter(is_sold=False)[0:6]
-    categories = Category.objects.all()
+    available = Item.objects.filter(is_sold=False).order_by('-created_at')
+    items = available[0:6]
+    categories = list(Category.objects.all())
+
+    # Newest items per category, so the home page can filter without reloading
+    for category in categories:
+        category.newest_items = available.filter(category=category)[0:6]
     return render(request, 'core/index.html',{
         'categories': categories,
         'items': items,
